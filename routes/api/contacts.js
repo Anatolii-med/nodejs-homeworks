@@ -5,7 +5,7 @@ const Joi = require("joi");
 
 const contactSchema = Joi.object({
 	name: Joi.string().required(),
-	phone: Joi.string().length(10).pattern(/^\d+$/).required(),
+	phone: Joi.string().length(10).pattern(\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}).required(),
 	email: Joi.string()
 		.email({ tlds: { allow: false } })
 		.required(),
