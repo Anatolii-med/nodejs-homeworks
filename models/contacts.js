@@ -19,7 +19,8 @@ const contactsSchema = Schema({
 
 const Contact = model("contact", contactsSchema);
 
-module.exports = Contact;
+module.exports = { Contact };
+
 // const fs = require("fs/promises");
 // const path = require("path");
 // const { v4 } = require("uuid");
