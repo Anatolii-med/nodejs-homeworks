@@ -2,6 +2,8 @@ const express = require("express");
 const { NotFound, BadRequest } = require("http-errors");
 const Joi = require("joi");
 const { Contact } = require("../../models/contacts");
+const { authenticate } = require("../../middlewares/authenticate");
+
 const router = express.Router();
 
 const contSchema = Joi.object({
@@ -15,9 +17,16 @@ const contSchema = Joi.object({
 		.required(),
 });
 
-router.get("/", async (req, res, next) => {
+router.get("/", authenticate, async (req, res, next) => {
 	try {
-		const contacts = await Contact.find({});
+		const { page = 1, limit = 20 } = req.query;
+		const { _id } = req.user;
+		const skip = (page - 1) * limit;
+		const contacts = await Contact.find(
+			{ owner: _id },
+			"-createdAt -updateAt",
+			{ skip, limit: +limit }
+		);
 		res.status(200).json({
 			status: "success",
 			contacts,
@@ -45,7 +54,7 @@ router.get("/:contactId", async (req, res, next) => {
 	}
 });
 
-router.post("/", async (req, res, next) => {
+router.post("/", authenticate, async (req, res, next) => {
 	try {
 		const data = req.body;
 		const { error } = contSchema.validate(data);
@@ -55,7 +64,8 @@ router.post("/", async (req, res, next) => {
 			throw error;
 		}
 
-		const newContact = await Contact.create(data);
+		const { _id } = req.user;
+		const newContact = await Contact.create({ ...req.body, owner: _id });
 
 		res.status(201).json({
 			status: "success",
